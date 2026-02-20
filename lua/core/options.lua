@@ -23,6 +23,7 @@ vim.opt.updatetime = 200
 vim.opt.timeoutlen = 400
 
 vim.opt.clipboard = "unnamedplus"
+vim.opt.termguicolors = true
 
 -- Better splits
 vim.opt.splitbelow = true

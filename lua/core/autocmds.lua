@@ -69,7 +69,7 @@ au("LspAttach", {
 		map("n", "gr", vim.lsp.buf.references, "References")
 		map("n", "gi", vim.lsp.buf.implementation, "Implementation")
 		map("n", "K", vim.lsp.buf.hover, "Kover")
-		map("n", "<leader>rn", vim.lsp.buf.rename, "Rename")
+		map("n", "<leader>lr", vim.lsp.buf.rename, "Rename")
 		map({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, "Code action")
 
 		map("n", "<leader>ld", vim.diagnostic.open_float, "Diagnostics: float")
@@ -96,4 +96,11 @@ au("LspAttach", {
 			vim.notify(table.concat(lines, "\n"))
 		end, "Show attached clients/root")
 	end,
+})
+
+vim.api.nvim_create_autocmd("FileType", {
+  group = vim.api.nvim_create_augroup("user_treesitter_start", { clear = true }),
+  callback = function(ev)
+    pcall(vim.treesitter.start, ev.buf)
+  end,
 })
