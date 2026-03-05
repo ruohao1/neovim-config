@@ -29,6 +29,8 @@ map("n", "<A-h>", "<cmd>vertical resize -3<cr>", opts)
 map("n", "<A-l>", "<cmd>vertical resize +3<cr>", opts)
 map("n", "<A-j>", "<cmd>resize -2<cr>", opts)
 map("n", "<A-k>", "<cmd>resize +2<cr>", opts)
+map("n", "<leader>\\", "<cmd>vsplit<cr>", opts)
+map("n", "<leader>|", "<cmd>split<cr>", opts)
 
 -- Replace word
 vim.keymap.set("n", "<leader>rw", function()
