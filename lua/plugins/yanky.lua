@@ -58,14 +58,25 @@ return {
 		config = function(_, opts)
 			require("yanky").setup(opts)
 			require("telescope").load_extension("yank_history")
+
+			vim.keymap.set({ "n", "x" }, "<leader>pp", function()
+				local ok_telescope, telescope = pcall(require, "telescope")
+				if not ok_telescope then
+					vim.notify("Telescope is not available", vim.log.levels.ERROR)
+					return
+				end
+
+				pcall(telescope.load_extension, "yank_history")
+				if not telescope.extensions.yank_history then
+					vim.notify("Telescope yank_history extension is not available", vim.log.levels.ERROR)
+					return
+				end
+
+				telescope.extensions.yank_history.yank_history()
+			end, { desc = "Open Yank History" })
 		end,
 		keys = {
-			{
-				"<leader>pp",
-				"<cmd>Telescope yank_history<cr>",
-				mode = { "n", "x" },
-				desc = "Open Yank History",
-			},
+			{ "<leader>pp", mode = { "n", "x" } },
 		},
 		dependencies = {
 			"nvim-telescope/telescope.nvim",

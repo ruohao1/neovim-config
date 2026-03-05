@@ -82,7 +82,14 @@ au("LspAttach", {
 
 		-- Doctor helpers (buffer-local)
 		map("n", "<leader>li", "<cmd>LspInfo<CR>", "LspInfo")
-		map("n", "<Leader>lr", "<Cmd>LspRestart<CR>", "LspRestart")
+		map("n", "<Leader>lr", function()
+			vim.cmd("LspRestart")
+			vim.defer_fn(function()
+				if vim.api.nvim_buf_is_valid(bufnr) then
+					vim.cmd("silent! Copilot enable")
+				end
+			end, 200)
+		end, "LspRestart")
 		map("n", "<leader>ls", function()
 			local clients = vim.lsp.get_clients({ bufnr = bufnr })
 			if #clients == 0 then
@@ -103,4 +110,36 @@ vim.api.nvim_create_autocmd("FileType", {
   callback = function(ev)
     pcall(vim.treesitter.start, ev.buf)
   end,
+})
+
+local function ensure_copilot_attached(bufnr)
+	if not vim.api.nvim_buf_is_valid(bufnr) then
+		return
+	end
+
+	if #vim.lsp.get_clients({ bufnr = bufnr, name = "copilot" }) > 0 then
+		return
+	end
+
+	-- Trigger copilot.lua to (re)attach after an LSP restart detaches its client.
+	vim.cmd("silent! Copilot enable")
+end
+
+au("LspDetach", {
+	group = aug("core_copilot_recover", { clear = true }),
+	callback = function(args)
+		local client_id = args.data and args.data.client_id or nil
+		if not client_id then
+			return
+		end
+
+		local client = vim.lsp.get_client_by_id(client_id)
+		if not client or client.name ~= "copilot" then
+			return
+		end
+
+		vim.defer_fn(function()
+			ensure_copilot_attached(args.buf)
+		end, 200)
+	end,
 })

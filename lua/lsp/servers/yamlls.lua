@@ -69,6 +69,12 @@ return {
     redhat = { telemetry = { enabled = false } },
     -- formatting disabled by default in yaml-language-server; enable it
     yaml = { format = { enable = true } },
+       schemas = {
+
+         ["~/projects/hlctl/taskfiles/*"] = "https://taskfile.dev/schema.json",
+         ["~/projects/hlctl/Taskfile.yml"] = "https://taskfile.dev/schema.json",
+       },
+
   },
   on_init = function(client)
     --- https://github.com/neovim/nvim-lspconfig/pull/4016

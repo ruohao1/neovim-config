@@ -2,7 +2,6 @@ return {
 	{
 		"HakonHarnes/img-clip.nvim",
 		event = "VeryLazy",
-		{ "<leader>p", "<cmd>PasteImage<cr>", desc = "Paste image from system clipboard" },
 		opts = {
 			{
 				default = {
@@ -47,6 +46,11 @@ return {
 
 				-- filetype specific options
 				filetypes = {
+					codecompanion = {
+						prompt_for_file_name = false,
+						template = "[Image]($FILE_PATH)",
+						use_absolute_path = true,
+					},
 					markdown = {
 						url_encode_path = true, ---@type boolean | fun(): boolean
 						template = "![$CURSOR]($FILE_PATH)", ---@type string | fun(context: table): string

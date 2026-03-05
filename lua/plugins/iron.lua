@@ -38,8 +38,6 @@ return {
 				return { "python", "-m", "IPython", unpack(args) }
 			end
 
-			-- _G.python_ipython_cmd = python_ipython_cmd
-
 			iron.setup({
 				config = {
 					-- Whether a repl should be discarded or not
@@ -53,7 +51,17 @@ return {
 						},
 						python = {
 							command = python_ipython_cmd,
-							format = common.bracketed_paste_python,
+							format = function(lines)
+								local filtered = {}
+								for _, line in ipairs(lines) do
+									-- Matches lines that DON'T start with '#' (ignoring leading whitespace)
+									if not line:match("^%s*#") then
+										table.insert(filtered, line)
+									end
+								end
+								-- Pass filtered lines to standard bracketed_paste for proper REPL execution
+								return common.bracketed_paste(filtered)
+							end,
 							block_dividers = { "# %%", "#%%" },
 							env = { PYTHON_BASIC_REPL = "1" }, --this is needed for python3.13 and up.
 						},

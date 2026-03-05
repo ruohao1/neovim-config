@@ -62,7 +62,6 @@ return {
 			end,
 			should_attach = function(_, _)
 				if not vim.bo.buflisted then
-					vim.notify("not attaching, buffer is not 'buflisted'")
 					return false
 				end
 
