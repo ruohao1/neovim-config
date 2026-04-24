@@ -2,6 +2,15 @@ return {
 	"zbirenbaum/copilot.lua",
 	cmd = "Copilot",
 	event = "InsertEnter",
+	keys = {
+		{
+			"<Leader>cc",
+			function()
+				require("copilot.suggestion").toggle_auto_trigger()
+			end,
+			desc = "Toggle Copilot",
+		},
+	},
 	config = function()
 		require("copilot").setup({
 			panel = {
@@ -58,7 +67,8 @@ return {
 			copilot_model = "",
 			disable_limit_reached_message = false, -- Set to `true` to suppress completion limit reached popup
 			root_dir = function()
-				return vim.fs.dirname(vim.fs.find(".git", { upward = true })[1])
+				local git_dir = vim.fs.find(".git", { upward = true })[1]
+				return git_dir and vim.fs.dirname(git_dir) or vim.uv.cwd()
 			end,
 			should_attach = function(_, _)
 				if not vim.bo.buflisted then
@@ -79,7 +89,4 @@ return {
 			server_opts_overrides = {},
 		})
 	end,
-	vim.keymap.set("n", "<Leader>cc", function()
-		require("copilot.suggestion").toggle_auto_trigger()
-	end, { desc = "Toggle Copliot" }),
 }
