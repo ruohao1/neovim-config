@@ -60,6 +60,7 @@ au("LspAttach", {
 	group = aug("core_lsp_attach", { clear = true }),
 	callback = function(args)
 		local bufnr = args.buf
+		local client = args.data and vim.lsp.get_client_by_id(args.data.client_id)
 		local map = function(mode, lhs, rhs, desc)
 			vim.keymap.set(mode, lhs, rhs, { buffer = bufnr, desc = desc })
 		end
@@ -68,28 +69,39 @@ au("LspAttach", {
 		map("n", "gD", vim.lsp.buf.declaration, "Go to declaration")
 		map("n", "gr", vim.lsp.buf.references, "References")
 		map("n", "gi", vim.lsp.buf.implementation, "Implementation")
-		map("n", "K", vim.lsp.buf.hover, "Kover")
+		map("n", "K", vim.lsp.buf.hover, "Hover")
 		map("n", "<leader>lr", vim.lsp.buf.rename, "Rename")
 		map({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, "Code action")
 
 		map("n", "<leader>ld", vim.diagnostic.open_float, "Diagnostics: float")
-		map("n", "[d", vim.diagnostic.goto_prev, "Diagnostics: prev")
-		map("n", "]d", vim.diagnostic.goto_next, "Diagnostics: next")
+		map("n", "[d", function()
+			vim.diagnostic.jump({ count = -1, float = true })
+		end, "Diagnostics: prev")
+		map("n", "]d", function()
+			vim.diagnostic.jump({ count = 1, float = true })
+		end, "Diagnostics: next")
 
 		map("n", "<leader>lf", function()
 			vim.lsp.buf.format({ bufnr = bufnr, timeout_ms = 2000 })
 		end, "Format buffer")
+		if client and client:supports_method("textDocument/inlayHint", bufnr) then
+			vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
+			map("n", "<leader>lh", function()
+				local enabled = vim.lsp.inlay_hint.is_enabled({ bufnr = bufnr })
+				vim.lsp.inlay_hint.enable(not enabled, { bufnr = bufnr })
+			end, "Toggle inlay hints")
+		end
 
 		-- Doctor helpers (buffer-local)
-		map("n", "<leader>li", "<cmd>LspInfo<CR>", "LspInfo")
-		map("n", "<Leader>lr", function()
-			vim.cmd("LspRestart")
+		map("n", "<leader>li", "<cmd>checkhealth vim.lsp<CR>", "LSP health")
+		map("n", "<Leader>lR", function()
+			vim.cmd("lsp restart")
 			vim.defer_fn(function()
 				if vim.api.nvim_buf_is_valid(bufnr) then
 					vim.cmd("silent! Copilot enable")
 				end
 			end, 200)
-		end, "LspRestart")
+		end, "LSP restart")
 		map("n", "<leader>ls", function()
 			local clients = vim.lsp.get_clients({ bufnr = bufnr })
 			if #clients == 0 then
@@ -103,13 +115,6 @@ au("LspAttach", {
 			vim.notify(table.concat(lines, "\n"))
 		end, "Show attached clients/root")
 	end,
-})
-
-vim.api.nvim_create_autocmd("FileType", {
-  group = vim.api.nvim_create_augroup("user_treesitter_start", { clear = true }),
-  callback = function(ev)
-    pcall(vim.treesitter.start, ev.buf)
-  end,
 })
 
 local function ensure_copilot_attached(bufnr)
